@@ -10,30 +10,15 @@ st.set_page_config(page_title="Bluesky Targeted Monitoring Scanner", page_icon="
 st.title("Bluesky Targeted Monitoring Scanner")
 st.markdown("Identify Bluesky accounts that may be involved in targeted monitoring of users based on specific keywords in users' profiles.")
 
-import os
-import json
+if "auth_data" not in st.session_state:
+    st.session_state["auth_data"] = {
+        "handle": "", 
+        "app_password": "", 
+        "target_handle": "", 
+        "keywords": "crypto, nfts, airdrop, web3"
+    }
 
-CONFIG_FILE = "auth_memory.json"
-
-def load_auth():
-    if os.path.exists(CONFIG_FILE):
-        try:
-            with open(CONFIG_FILE, "r") as f:
-                return json.load(f)
-        except:
-            pass
-    return {"handle": "", "app_password": "", "target_handle": "", "keywords": "crypto, nfts, airdrop, web3"}
-
-def save_auth(handle, app_password, target_handle, keywords):
-    with open(CONFIG_FILE, "w") as f:
-        json.dump({
-            "handle": handle, 
-            "app_password": app_password,
-            "target_handle": target_handle,
-            "keywords": keywords
-        }, f)
-
-auth_data = load_auth()
+auth_data = st.session_state["auth_data"]
 
 # Main Interface Configuration
 st.header("Authentication & Target Details")
@@ -68,12 +53,17 @@ with target_col3:
         help="Bluesky organizes followers from newest to oldest. Select how many recent followers to analyze."
     )
 
-# Automatically save any changes to our local JSON memory
+# Update session state with the current input values
 if (handle != auth_data.get("handle") or 
     app_password != auth_data.get("app_password") or 
     target_handle != auth_data.get("target_handle") or 
     keywords_input != auth_data.get("keywords")):
-    save_auth(handle, app_password, target_handle, keywords_input)
+    st.session_state["auth_data"] = {
+        "handle": handle,
+        "app_password": app_password,
+        "target_handle": target_handle,
+        "keywords": keywords_input
+    }
 
 if st.button("Run Target Audit", type="primary"):
     if not handle or not app_password or not target_handle:
