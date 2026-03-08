@@ -1,22 +1,24 @@
-# Bluesky Network Authenticity Analyzer
+# Bluesky Targeted Monitoring Scanner
 
-A Streamlit application that assesses the risk of inauthentic followers on Bluesky.
+A Streamlit application designed to identify Bluesky accounts that may be involved in targeted monitoring of users based on specific keywords in users' profiles.
+
+Reporting indicates that governments and organized groups sometimes use fake accounts, posing as members of a community, to monitor and engage with surveilled accounts. This tool helps visualize those networks.
 
 ## Features
-- **Tier 1 (Surface Scan):** Fetches the complete list of followers for a target user and calculates a base "Inauthenticity Score" based on account age, follower/following ratio, and post count.
-- **Tier 2 (Deep Scan):** For highly suspicious accounts from Tier 1, fetches a sample of their following list and analyzes keyword density in display names and bios against a set of custom topic keywords.
-- **Interactive UI:** View distribution charts, a rankable data table of followers, and download a CSV report.
-
-## Requirements
-- Apple Silicon (M1/M2/M3) Mac or compatible environment
-- Python 3.10+
+- **Deep Scan (Keyword Density):** Fetches the followers of a target account and deeply scans the profiles of the accounts *they* follow to calculate a "Topic Keyword Density".
+- **Heuristic Flags:** Runs supplementary behavioral checks to guess if an account behaves like an automated script, flagging abnormalities like suspiciously young account age, bizarre follow/follower ratios, or a total lack of posts.
+- **Interactive UI:** Navigate through risk buckets (High Risk, Medium Risk, Low Risk) based on their topic density.
+- **Topology Cartography:** Generates two interactive `pyvis` physics-based network graphs: 
+  - **Suspicious Network:** Visualizes coordinated behavior between the most suspicious followers.
+  - **Target Overlap:** Identifies which suspicious followers are also monitoring accounts that the target directly follows (Mutual Friends).
+- **Export Data:** Download a comprehensive JSON or CSV report of the audit state for external analysis.
 
 ## Setup Instructions
 
-1. **Create and Activate a Virtual Environment:**
-   Run the following commands in your terminal to isolate your dependencies:
+1. **Clone the Repository & Create Virtual Environment:**
+   Run the following commands in your terminal:
    ```bash
-   python3 -m venv venv
+   python -m venv venv
    source venv/bin/activate
    ```
 
@@ -33,7 +35,13 @@ A Streamlit application that assesses the risk of inauthentic followers on Blues
 
 ## Usage
 Once the Streamlit app opens in your browser:
-1. Enter your Bluesky Handle (e.g., `you.bsky.social`) and App Password in the sidebar.
-2. Enter the target Bluesky handle you wish to audit.
-3. Provide a list of comma-separated Custom Topic Keywords (e.g., `crypto, nfts, airdrop`).
-4. Click "Run Target Audit" to execute the analysis and view the results!
+
+1. **Authenticate:** Provide your own Bluesky Handle and a specialized App Password. (*Note: Never use your master password. Generate an App Password in your Bluesky Settings -> Advanced -> App Passwords*).
+2. **Set Target:** Enter the target Bluesky handle you wish to audit (e.g., `target.bsky.social`).
+3. **Configure Scanner:**
+   - **Custom Topic Keywords:** Provide a comma-separated list of keywords the tool will use to calculate density (e.g., `crypto, nfts, airdrop`).
+   - **Scan Depth:** Choose to analyze the `100`, `500`, or `1000` most recent followers, or scan the `All Time` directory.
+4. **Execute:** Click "Run Target Audit" to initiate the deep scans and visualize the generated cartography!
+
+## Limitations
+This tool is designed to identify one very specific type of account and behavior pattern: networks of keyword-focused accounts following a central target. It is **not** an exhaustive tool to determine if your account is being surveilled. Most monitoring tools and data scrapers do not require the use of fake "follower" accounts at all to monitor public activity.
