@@ -4,6 +4,7 @@ import altair as alt
 import streamlit.components.v1 as components
 from pyvis.network import Network
 import scanner
+import html
 
 st.set_page_config(page_title="Bluesky Targeted Monitoring Scanner", page_icon="🕵️", layout="wide")
 
@@ -235,7 +236,7 @@ if st.button("Run Target Audit", type="primary"):
             }
             
             # Add central node
-            net.add_node(target_handle, label=target_handle, color='#d80000', size=25, title="Audit Target")
+            net.add_node(html.escape(target_handle), label=html.escape(target_handle), color='#d80000', size=25, title="Audit Target")
             
             # Add suspicious nodes and default connection to target
             for _, row in suspicious_network_df.iterrows():
@@ -246,9 +247,9 @@ if st.button("Run Target Audit", type="primary"):
                 flags_str = "\n".join(row['flags']) if isinstance(row['flags'], list) else str(row['flags'])
                 score_val = row['deep_scan_score']
                 node_color = 'orange'
-                title_tooltip = f"Handle: {node_id}\nDensity: {score_val:.1f}%\nFlags:\n{flags_str}"
-                net.add_node(node_id, label=node_id, title=title_tooltip, color=node_color, size=15)
-                net.add_edge(node_id, target_handle, color='gray')
+                title_tooltip = f"Handle: {html.escape(node_id)}\nDensity: {score_val:.1f}%\nFlags:\n{html.escape(flags_str)}"
+                net.add_node(html.escape(node_id), label=html.escape(node_id), title=title_tooltip, color=node_color, size=15)
+                net.add_edge(html.escape(node_id), html.escape(target_handle), color='gray')
                 
             # Render shared connections
             if not connections_df.empty:
@@ -259,14 +260,14 @@ if st.button("Run Target Audit", type="primary"):
                 for followee in shared_followees:
                      if followee == target_handle:
                          continue
-                     net.add_node(followee, label=followee, color='#333333', size=10, title=f"Shared Connection: {followee}")
+                     net.add_node(html.escape(followee), label=html.escape(followee), color='#333333', size=10, title=f"Shared Connection: {html.escape(followee)}")
                     
                 for _, row in connections_df.iterrows():
                     source = row['source_handle']
                     target = row['target_handle']
                     if target in shared_followees and target != target_handle:
                         # Shared connections are grayed-out arrows to blue nodes
-                        net.add_edge(source, target, color='#cccccc')
+                        net.add_edge(html.escape(source), html.escape(target), color='#cccccc')
                 
             path = '/tmp/graph.html'
             net.save_graph(path)
@@ -362,16 +363,16 @@ if st.button("Run Target Audit", type="primary"):
                     }
                     
                     # Add Target Node
-                    net2.add_node(target_handle, label=target_handle, color='#d80000', size=25, title="Audit Target")
+                    net2.add_node(html.escape(target_handle), label=html.escape(target_handle), color='#d80000', size=25, title="Audit Target")
                     
                     added_nodes = {target_handle}
                     
                     # Add Mutual Friend nodes and edges from target
                     for friend in mutual_friends:
                         if friend not in added_nodes:
-                            net2.add_node(friend, label=friend, color='#333333', size=15, title=f"Mutual Friend: {friend}")
+                            net2.add_node(html.escape(friend), label=html.escape(friend), color='#333333', size=15, title=f"Mutual Friend: {html.escape(friend)}")
                             added_nodes.add(friend)
-                            net2.add_edge(target_handle, friend, color='gray')
+                            net2.add_edge(html.escape(target_handle), html.escape(friend), color='gray')
                             
                     # Add suspicious followers that follow these mutual friends
                     for _, row in connections_df[connections_df['target_handle'].isin(mutual_friends)].iterrows():
@@ -389,11 +390,11 @@ if st.button("Run Target Audit", type="primary"):
                                 node_color = 'orange'
                                 title_tooltip = f"Targeted Follower\nDensity: Unknown"
                                 
-                            net2.add_node(susp_handle, label=susp_handle, title=title_tooltip, color=node_color, size=15)
+                            net2.add_node(html.escape(susp_handle), label=html.escape(susp_handle), title=title_tooltip, color=node_color, size=15)
                             added_nodes.add(susp_handle)
                             
                         # Suspicious node follows friend
-                        net2.add_edge(susp_handle, friend_handle, color='#cccccc')
+                        net2.add_edge(html.escape(susp_handle), html.escape(friend_handle), color='#cccccc')
                         
                     path2 = '/tmp/graph2.html'
                     net2.save_graph(path2)
