@@ -1,0 +1,23 @@
+# Python Virtual Environments
+venv/
+.env/
+env/
+
+# Custom Configuration Data (DANGER: DO NOT COMMIT CREDENTIALS)
+auth_memory.json
+
+# Streamlit specific
+.streamlit/*
+!.streamlit/config.toml
+
+# Scratch files and generated outputs
+test_*.py
+test_out.html
+
+# Pycache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# OS Generated
+.DS_Store
